@@ -1,7 +1,10 @@
 = go-mlx90615
 janreggie
 
-image:https://goreportcard.com/badge/github.com/janreggie/go-mlx90615[link=https://goreportcard.com/report/github.com/janreggie/go-mlx90615]
+image:https://goreportcard.com/badge/github.com/janreggie/go-mlx90615["Go Report Card", link="https://goreportcard.com/report/github.com/janreggie/go-mlx90615"]
+image:https://travis-ci.com/janreggie/go-mlx90615.svg?branch=master["Build Status", link="https://travis-ci.com/janreggie/go-mlx90615"]
+image:https://godoc.org/github.com/janreggie/go-mlx90615?status.svg["GoDoc reference", link="https://godoc.org/github.com/janreggie/go-mlx90615"]
+image:https://img.shields.io/github/license/janreggie/go-mlx90615.svg["GitHub", link="LICENSE"]
 
 This library allows the reading of temperatures from the MLX90615
 using Go on the Raspberry Pi. This uses the link:https://github.com/d2r2/go-i2c[github.com/d2r2/go-i2c]
