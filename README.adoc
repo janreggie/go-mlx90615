@@ -1,0 +1,41 @@
+= go-mlx90615
+janreggie
+
+This library allows the reading of temperatures from the MLX90615
+using Go on the Raspberry Pi. This uses the link:https://github.com/d2r2/go-i2c[github.com/d2r2/go-i2c]
+I2C-bus library.
+
+This is based on link:https://github.com/zerynth/lib-melexis-mlx90615[zerynth/lib-melexis-mlx90615],
+link:https://github.com/2n3906/python-sensor-drivers[2n3906/python-sensor-drivers], and
+link:https://github.com/skiselev/MLX90615[skiselev/MLX90615].
+
+== Sample usage
+[source,go]
+----
+import (
+	"github.com/d2r2/go-i2c"
+	"github.com/janreggie/go-mlx90615"
+)
+
+func main() {
+	i2cObj, err := i2c.NewI2C(0x5B, 2)
+	if err != nil {
+		log.Fatalln("NewI2C error: ", err)
+	}
+	defer i2cObj.Close()
+
+	mlxObj := mlx90615.NewMLX90615()
+	if err := mlxObj.Reset(i2cMLX90615); err != nil {
+		log.Fatalln("Reset error: ", err)
+	}
+	if objectTemp, err := mlxObj.ReadObjectTemperature(i2cObj); err != nil {
+		log.Fatalln("ReadObjectTemperature error: ", err)
+	}
+	if ambientTemp, err := mlxObj.ReadAmbientTemperature(i2cObj); err != nil {
+		log.Fatalln("ReadAmbientTemperature error: ", err)
+	}
+}
+----
+
+== License
+See link:LICENSE[]
