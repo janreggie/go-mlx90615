@@ -1,6 +1,8 @@
 = go-mlx90615
 janreggie
 
+image:https://goreportcard.com/badge/github.com/janreggie/go-mlx90615[link=https://goreportcard.com/report/github.com/janreggie/go-mlx90615]
+
 This library allows the reading of temperatures from the MLX90615
 using Go on the Raspberry Pi. This uses the link:https://github.com/d2r2/go-i2c[github.com/d2r2/go-i2c]
 I2C-bus library.
@@ -30,9 +32,13 @@ func main() {
 	}
 	if objectTemp, err := mlxObj.ReadObjectTemperature(i2cObj); err != nil {
 		log.Fatalln("ReadObjectTemperature error: ", err)
+	} else {
+		fmt.Println("Object temperature is %v", objectTemp)
 	}
 	if ambientTemp, err := mlxObj.ReadAmbientTemperature(i2cObj); err != nil {
 		log.Fatalln("ReadAmbientTemperature error: ", err)
+	} else {
+		fmt.Println("Ambient temperature is %v", ambientTemp)
 	}
 }
 ----
