@@ -1,0 +1,6 @@
+service:
+  project-path: github.com/janreggie/go-mlx90615 # vanity import path if needed
+  golangci-lint-version: 1.12.x
+  prepare:
+    - make deps
+    - make generate
