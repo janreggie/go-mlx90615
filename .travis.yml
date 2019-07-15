@@ -1,11 +1,12 @@
 dist: xenial
 language: go
 go:
-  - "1.12.x"
+  - "1.10"
+  - 1.12.x
 # - "tip"
 
 git:
-  - depth: 5
+  - depth: 1
 
 # first part of the GOARCH workaround
 # setting the GOARCH directly doesn't work, since the value will be overwritten later
@@ -19,7 +20,7 @@ env:
 
 # second part of the GOARCH workaround
 # now actually set the GOARCH env variable to the value of the temporary variable set earlier
-before_install:
+before_script:
   - go install github.com/golangci/golangci-lint/cmd/golangci-lint
   - export GOARCH=$TRAVIS_GOARCH GOOS=$TRAVIS_GOOS
   - go env # for debugging
