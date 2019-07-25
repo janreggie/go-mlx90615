@@ -7,7 +7,8 @@ image:https://godoc.org/github.com/janreggie/go-mlx90615?status.svg["GoDoc refer
 image:https://img.shields.io/github/license/janreggie/go-mlx90615.svg["GitHub", link="LICENSE"]
 
 This library allows the reading of temperatures from the MLX90615
-using Go on the Raspberry Pi. This uses the link:https://github.com/d2r2/go-i2c[github.com/d2r2/go-i2c]
+using Go on the Raspberry Pi.
+This uses the link:https://godoc.org/periph.io/x/periph/conn/i2c[periph.io/x/periph/conn/i2c]
 I2C-bus library.
 
 This is based on link:https://github.com/zerynth/lib-melexis-mlx90615[zerynth/lib-melexis-mlx90615],
@@ -17,32 +18,34 @@ link:https://github.com/skiselev/MLX90615[skiselev/MLX90615].
 == Sample usage
 [source,go]
 ----
+package main
+
 import (
-	"github.com/d2r2/go-i2c"
-	"github.com/janreggie/go-mlx90615"
+    "log"
+
+    "github.com/janreggie/go-mlx90615"
 )
 
 func main() {
-	i2cObj, err := i2c.NewI2C(0x5B, 2)
-	if err != nil {
-		log.Fatalln("NewI2C error: ", err)
-	}
-	defer i2cObj.Close()
-
-	mlxObj := mlx90615.NewMLX90615()
-	if err := mlxObj.Reset(i2cMLX90615); err != nil {
-		log.Fatalln("Reset error: ", err)
-	}
-	if objectTemp, err := mlxObj.ReadObjectTemperature(i2cObj); err != nil {
-		log.Fatalln("ReadObjectTemperature error: ", err)
-	} else {
-		fmt.Println("Object temperature is %v", objectTemp)
-	}
-	if ambientTemp, err := mlxObj.ReadAmbientTemperature(i2cObj); err != nil {
-		log.Fatalln("ReadAmbientTemperature error: ", err)
-	} else {
-		fmt.Println("Ambient temperature is %v", ambientTemp)
-	}
+    mlxObj, err := mlx90615.NewMLX90615(0x5B, 1)
+    if err != nil {
+        log.Fatalln("NewMLX90615 error: ", err)
+    }
+    if ambientTemp, err := mlxObj.ReadAmbientTemperature(); err != nil {
+        log.Fatalln("Can't read ambient temperature: ", err)
+    } else {
+        log.Println("Ambient temperature is ", ambientTemp)
+    }
+    if objectTemp, err := mlxObj.ReadObjectTemperature(); err != nil {
+        log.Fatalln("Can't read object temperature: ", err)
+    } else {
+        log.Println("Object temperature is ", objectTemp)
+    }
+    if emissivity, err := mlxObj.ReadEmissivity(); err != nil {
+        log.Fatalln("Can't read emissivity: ", err)
+    } else {
+        log.Println("Emissivity is ", emissivity)
+    }
 }
 ----
 

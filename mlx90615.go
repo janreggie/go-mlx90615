@@ -1,14 +1,16 @@
 /*
 Package mlx90615 implements reading of the MLX90615 sensor using Go.
-
 */
 package mlx90615
 
 import (
-	"fmt"
 	"math"
+	"strconv"
 
-	"github.com/d2r2/go-i2c"
+	"periph.io/x/periph/conn/i2c/i2creg"
+
+	"periph.io/x/periph/conn/i2c"
+	"periph.io/x/periph/host"
 )
 
 // Appropriate registers for the MLX90615
@@ -18,65 +20,73 @@ const (
 	RegisterEmissivity = 0x13
 )
 
+func readingToTemperature(raw []byte) (temp float64) {
+	if len(raw) != 2 {
+		return -1 // no way...
+	}
+	temp = float64((uint16(raw[1]&0x007F) << 8) | uint16(raw[0]))
+	temp = temp*0.02 - 273.15
+	return
+}
+
+func emissivityToBytes(emissivity float64) []byte {
+	// i guess little endian?
+	bufferInt := uint16(math.Round(16384 * emissivity))
+	return []byte{byte(bufferInt & 0xFF), byte(bufferInt << 8)}
+}
+
 // MLX90615 is the sensor itself
 type MLX90615 struct {
-	// fieldless!
+	// unexported fields ;)
+	bus *i2c.BusCloser
+	dev *i2c.Dev
 }
 
 // NewMLX90615 returns new sensor instance
-func NewMLX90615() *MLX90615 {
-	v := &MLX90615{}
-	return v
+func NewMLX90615(addr uint8, bus int) (*MLX90615, error) {
+	if _, err := host.Init(); err != nil {
+		return nil, err
+	}
+	busObj, err := i2creg.Open(strconv.Itoa(bus))
+	if err != nil {
+		return nil, err
+	}
+	devObj := i2c.Dev{Bus: busObj, Addr: uint16(addr)}
+	return &MLX90615{&busObj, &devObj}, nil
 }
 
-func readingToTemperature(raw int16) (temp float64) {
-	return float64(raw)*0.02 - 273.15
+func (mlx *MLX90615) readRegister(register byte, size int) ([]byte, error) {
+	buffer := make([]byte, size)
+	if err := mlx.dev.Tx([]byte{register}, buffer); err != nil {
+		return nil, err
+	}
+	return buffer, nil
 }
 
 // ReadAmbientTemperature returns the ambient temperature and an error value
-func (mlxobj *MLX90615) ReadAmbientTemperature(i2cObj *i2c.I2C) (temp float64, err error) {
-	reading, err := i2cObj.ReadRegS16LE(RegisterAmbient)
+func (mlx *MLX90615) ReadAmbientTemperature() (temp float64, err error) {
+	buffer, err := mlx.readRegister(RegisterAmbient, 2)
 	if err != nil {
 		return 0, err
 	}
-	temp = readingToTemperature(reading)
-	return
+	return readingToTemperature(buffer), nil
 }
 
 // ReadObjectTemperature returns the object temperature and an error value
-func (mlxobj *MLX90615) ReadObjectTemperature(i2cObj *i2c.I2C) (temp float64, err error) {
-	reading, err := i2cObj.ReadRegS16LE(RegisterObject)
+func (mlx *MLX90615) ReadObjectTemperature() (temp float64, err error) {
+	buffer, err := mlx.readRegister(RegisterObject, 2)
 	if err != nil {
 		return 0, err
 	}
-	temp = readingToTemperature(reading)
-	return
+	return readingToTemperature(buffer), nil
 }
 
-// ReadEmissivity reads the emissivity of the MLX90615. Emissivity is a positive
-// float no more than 1.00.
-func (mlxobj *MLX90615) ReadEmissivity(i2cObj *i2c.I2C) (emissivity float64, err error) {
-	reading, err := i2cObj.ReadRegS16LE(RegisterEmissivity)
+// ReadEmissivity reads the emissivity of the MLX90615.
+// Emissivity is a positive float no more than 1.00.
+func (mlx *MLX90615) ReadEmissivity() (emissivity float64, err error) {
+	buffer, err := mlx.readRegister(RegisterAmbient, 2)
 	if err != nil {
 		return 0, err
 	}
-	return float64(reading) / 16384, nil
-}
-
-// WriteEmissivity sets the emissivity of the MLX90615. Emissivity must be
-// a positive float no more than 1.00, otherwise will return an error
-func (mlxobj *MLX90615) WriteEmissivity(i2cObj *i2c.I2C, emissivity float64) error {
-	if emissivity <= 0 || emissivity > 1 {
-		return fmt.Errorf("Emissivity must be positive and less than 1. Got %v instead", emissivity)
-	}
-	var toWrite = int16(math.Round(emissivity * 16384))
-	if err := i2cObj.WriteRegS16LE(RegisterEmissivity, toWrite); err != nil {
-		return err
-	}
-	return nil
-}
-
-// Reset "resets" the MLX90615 by writing 1 as emissivity
-func (mlxobj *MLX90615) Reset(i2cObj *i2c.I2C) error {
-	return mlxobj.WriteEmissivity(i2cObj, 1)
+	return float64(uint16(buffer[1])<<8|uint16(buffer[0])) / 16384, nil
 }
