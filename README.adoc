@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjanreggie%2Fgo-mlx90615.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjanreggie%2Fgo-mlx90615?ref=badge_shield)
+
 = go-mlx90615
 janreggie
 
@@ -51,3 +53,7 @@ func main() {
 
 == License
 See link:LICENSE[]
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjanreggie%2Fgo-mlx90615.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjanreggie%2Fgo-mlx90615?ref=badge_large)
